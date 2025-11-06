@@ -1,73 +1,66 @@
-const apiKey = "EnZhGXOz1zMmnUYihSWqMbr5Pclwg2KJN1aCBnJh"; 
+const apiKey = "29muwaHKIVUrBfLza8eJNNxQuEbg6DDINTzXFB6a"; // replace with your NASA API key
 const form = document.getElementById("search-form");
 const input = document.getElementById("search-input");
-const currentImageContainer = document.getElementById("current-image-container");
-const searchHistory = document.getElementById("search-history");
+const container = document.getElementById("current-image-container");
+const historyList = document.getElementById("search-history");
+const searchButton = document.getElementById("search-button");
 
-// 🔹 When the page loads
-document.addEventListener("DOMContentLoaded", () => {
-  getCurrentImageOfTheDay();
+// Load current image on page load
+window.onload = () => {
+  getCurrentImageOfTheDay(false);
+  addSearchToHistory();
+};
+
+form.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const date = input.value;
+  if (!date) return;
+  getImageOfTheDay(date);
+  saveSearch(date);
   addSearchToHistory();
 });
 
-// 🔹 Fetch and display NASA Image of the Day (current)
-async function getCurrentImageOfTheDay() {
+async function getCurrentImageOfTheDay(disableButton = true) {
   const currentDate = new Date().toISOString().split("T")[0];
+  await getImageOfTheDay(currentDate, true, disableButton);
+}
+
+async function getImageOfTheDay(date, isCurrent = false, disableButton = true) {
   try {
-    const response = await fetch(`https://api.nasa.gov/planetary/apod?date=${currentDate}&api_key=${apiKey}`);
+    showLoading();
+    if (disableButton)
+      disableSearchButton(true);
+
+    const response = await fetch(
+      `https://api.nasa.gov/planetary/apod?api_key=${apiKey}&date=${date}`
+    );
+    if (!response.ok) throw new Error("Failed to fetch image data");
+
     const data = await response.json();
-
-    if (data.error) {
-      currentImageContainer.innerHTML = `<div class="error-message">Error: ${data.error.message}</div>`;
-      return;
-    }
-
-    displayImage(data);
+    displayImage(data, isCurrent);
   } catch (error) {
-    currentImageContainer.innerHTML = `<div class="error-message">Failed to load NASA Image of the Day.</div>`;
+    container.innerHTML = `<p style="color:red;">Error: ${error.message}</p>`;
+    if (disableButton)
+      disableSearchButton(false);
+  } finally {
+    if (disableButton)
+      disableSearchButton(false);
   }
 }
 
-// 🔹 Fetch image for selected date
-async function getImageOfTheDay(date) {
-  try {
-    const response = await fetch(`https://api.nasa.gov/planetary/apod?date=${date}&api_key=${apiKey}`);
-    const data = await response.json();
-
-    if (data.error) {
-      currentImageContainer.innerHTML = `<div class="error-message">Error: ${data.error.message}</div>`;
-      return;
+function displayImage(data, isCurrent) {
+  console.log("data", data);
+  container.innerHTML = `
+    <h2>${isCurrent ? "Today's Picture" : "Picture on " + data.date}</h2>
+    <h3>${data.title}</h3>
+    ${data.media_type === "image"
+      ? `<img src="${data.url}" alt="${data.title}">`
+      : `<iframe src="${data.url}" frameborder="0" allowfullscreen></iframe>`
     }
-
-    displayImage(data);
-    saveSearch(date);
-    addSearchToHistory();
-  } catch (error) {
-    currentImageContainer.innerHTML = `<div class="error-message">Failed to load image for ${date}. Please try again.</div>`;
-  }
-}
-
-// 🔹 Display the fetched image or video
-function displayImage(data) {
-  let mediaContent = "";
-
-  if (data.media_type === "image") {
-    mediaContent = `<img src="${data.url}" alt="${data.title}" />`;
-  } else if (data.media_type === "video") {
-    mediaContent = `<iframe width="560" height="315" src="${data.url}" frameborder="0" allowfullscreen></iframe>`;
-  } else {
-    mediaContent = `<p>No media available for this date.</p>`;
-  }
-
-  currentImageContainer.innerHTML = `
-    <h2>${data.title}</h2>
-    <p><strong>Date:</strong> ${data.date}</p>
-    ${mediaContent}
     <p>${data.explanation}</p>
   `;
 }
 
-// 🔹 Save the date to localStorage
 function saveSearch(date) {
   let searches = JSON.parse(localStorage.getItem("searches")) || [];
   if (!searches.includes(date)) {
@@ -76,24 +69,26 @@ function saveSearch(date) {
   }
 }
 
-// 🔹 Display saved search history
 function addSearchToHistory() {
   const searches = JSON.parse(localStorage.getItem("searches")) || [];
-  searchHistory.innerHTML = "";
-
-  searches.forEach(date => {
+  historyList.innerHTML = "";
+  searches.forEach((date) => {
     const li = document.createElement("li");
     li.textContent = date;
-    li.addEventListener("click", () => getImageOfTheDay(date));
-    searchHistory.appendChild(li);
+    li.addEventListener("click", () => {
+      getImageOfTheDay(date);
+    });
+    historyList.appendChild(li);
   });
 }
 
-// 🔹 Handle form submission
-form.addEventListener("submit", (event) => {
-  event.preventDefault();
-  const selectedDate = input.value;
-  if (selectedDate) {
-    getImageOfTheDay(selectedDate);
-  }
-});
+function showLoading() {
+  container.innerHTML = `
+    <div class="loader"></div>
+    <p>Loading NASA image...</p>
+  `;
+}
+
+function disableSearchButton(disabled) {
+  searchButton.disabled = disabled;
+}
