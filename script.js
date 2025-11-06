@@ -1,4 +1,4 @@
-const apiKey = "29muwaHKIVUrBfLza8eJNNxQuEbg6DDINTzXFB6a"; // replace with your NASA API key
+const apiKey = "0CjQUQcaPobDfYv2JBol70ediV1chY0jISnkha6S"; // replace with your NASA API key
 const form = document.getElementById("search-form");
 const input = document.getElementById("search-input");
 const container = document.getElementById("current-image-container");
@@ -92,3 +92,4 @@ function showLoading() {
 function disableSearchButton(disabled) {
   searchButton.disabled = disabled;
 }
+
