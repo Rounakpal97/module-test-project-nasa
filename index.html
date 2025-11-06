@@ -4,19 +4,19 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>NASA Picture of the Day</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <h1>NASA Picture of the Day</h1>
 
   <form id="search-form">
-    <label for="search-input">Select a Date:</label>
+    <label for="search-input">Select a date:</label>
     <input type="date" id="search-input" required />
-    <button type="submit">Search</button>
+    <button type="submit" id="search-button">Search</button>
   </form>
 
-  <section id="current-image-container">
-    <!-- NASA image data will be displayed here -->
+  <section id="current-image-container" class="image-container">
+    <!-- NASA image of the day will appear here -->
   </section>
 
   <h2>Search History</h2>
