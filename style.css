@@ -54,7 +54,7 @@ button:hover {
 }
 
 #current-image-container p {
-  text-align: left;
+  text-align: center;
   line-height: 1.6;
   max-width: 800px;
   margin: 10px auto;
@@ -89,3 +89,4 @@ button:hover {
 #search-history li:hover {
   background-color: #00bcd4;
 }
+
